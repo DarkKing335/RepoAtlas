@@ -1,0 +1,182 @@
+import os
+import json
+from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
+
+# 1. Khai báo mỏ neo đường dẫn tuyệt đối
+BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+WIKI_OUTPUT_DIR = BACKEND_DIR / "wiki"
+
+# Đảm bảo thư mục wiki và thư mục con symbols tồn tại trước khi ghi file
+WIKI_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+(WIKI_OUTPUT_DIR / "symbols").mkdir(parents=True, exist_ok=True)
+
+def get_template_env():
+    # Đồng bộ dùng Pathlib cho nhất quán
+    current_dir = Path(__file__).resolve().parent
+    template_dir = current_dir / 'templates'
+    return Environment(loader=FileSystemLoader(str(template_dir)))
+
+def render_html_page(template_name: str, section_data: dict):
+    """
+    Hàm render tổng quát.
+    Nhận tên file template (ví dụ: 'tech.html') và dữ liệu section (từ Member 3).
+    """
+    env = get_template_env()
+    
+    # Load đúng template dựa vào tên file
+    template = env.get_template(template_name)
+    
+    # Truyền dữ liệu vào Jinja2
+    html_output = template.render(section=section_data, rel_prefix="")
+    
+    # 2. Trực tiếp lưu file bằng hằng số WIKI_OUTPUT_DIR
+    output_path = WIKI_OUTPUT_DIR / template_name
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html_output)
+
+def render_symbol_pages(repository_index: dict):
+    """
+    Hàm render symbols nhận thẳng dữ liệu index từ tham số.
+    """
+    symbols = repository_index.get('symbols', [])
+    if not symbols:
+        return
+        
+    env = get_template_env()
+    template = env.get_template('symbol.html')
+    
+    count = 0
+    for symbol in symbols:
+        fqn = symbol.get('fully_qualified_name')
+        if not fqn:
+            continue
+            
+        safe_filename = fqn.replace('<', '_').replace('>', '_') + '.html'
+        html_output = template.render(symbol=symbol, rel_prefix="../")
+        
+        # 3. Sử dụng hằng số cho đường dẫn thư mục symbols
+        output_path = WIKI_OUTPUT_DIR / "symbols" / safe_filename
+        with open(output_path, 'w', encoding='utf-8') as out_f:
+            out_f.write(html_output)
+        count += 1
+
+def render_index_page(repository_index: dict, analysis_data: dict = None):
+    """
+    Renders the master landing page wiki/index.html.
+    """
+    env = get_template_env()
+    template = env.get_template('index.html')
+    
+    repo_data = {
+        'name': repository_index.get('repository_name', 'Project'),
+        'languages': repository_index.get('languages', []),
+        'files': repository_index.get('files', []),
+        'symbols': repository_index.get('symbols', []),
+        'relationships': repository_index.get('relationships', []),
+    }
+    
+    html_output = template.render(repository=repo_data, analysis=analysis_data or {}, rel_prefix="")
+    output_path = WIKI_OUTPUT_DIR / "index.html"
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html_output)
+
+def generate_search_index(repository_index):
+    """Tạo file JSON chứa index tìm kiếm cho toàn bộ website"""
+    search_data = [
+        {"name": "Dashboard", "url": "index.html"},
+        {"name": "Technology Stack", "url": "tech.html"},
+        {"name": "Architecture", "url": "architecture.html"},
+        {"name": "Modules", "url": "modules.html"},
+        {"name": "Tests", "url": "tests.html"}
+    ]
+    
+    # Lấy danh sách symbols
+    for symbol in repository_index.get('symbols', []):
+        fqn = symbol.get('fully_qualified_name')
+        if fqn:
+            safe_filename = fqn.replace('<', '_').replace('>', '_') + '.html'
+            search_data.append({"name": fqn, "url": f"symbols/{safe_filename}"})
+            
+    # 4. Sử dụng hằng số cho đường dẫn file index
+    index_path = WIKI_OUTPUT_DIR / "search_index.json"
+    
+    with open(index_path, 'w', encoding='utf-8') as f:
+        json.dump(search_data, f, ensure_ascii=False)
+    print("✅ Đã tạo Search Index (search_index.json)")
+
+
+def _format_signature(symbol: dict) -> str:
+    """Renders a human-readable signature string for a symbol."""
+    signature = symbol.get("signature") or {}
+    params = signature.get("parameters") or []
+    param_str = ", ".join(
+        f"{p.get('type', '?')} {p.get('name', '?')}" for p in params
+    )
+    return_type = signature.get("return_type")
+    if return_type:
+        return f"{return_type} {symbol.get('name')}({param_str})"
+    return f"{symbol.get('name')}({param_str})"
+
+
+def generate_ai_context(repository_index, analysis_data=None):
+    """Tạo file JSON giàu ngữ cảnh cho widget 'Ask Local AI'.
+
+    Bổ sung thông tin chi tiết về từng symbol (docstring, file path, signature,
+    annotations) cùng các section nội dung wiki (tech, tests, architecture,
+    modules) để AI có thể trả lời câu hỏi về repo được phân tích.
+    """
+    symbols = []
+    for symbol in repository_index.get("symbols", []):
+        fqn = symbol.get("fully_qualified_name")
+        if not fqn:
+            continue
+        safe_filename = fqn.replace("<", "_").replace(">", "_") + ".html"
+        entry = {
+            "name": symbol.get("name"),
+            "fully_qualified_name": fqn,
+            "kind": symbol.get("kind"),
+            "language": symbol.get("language"),
+            "file_path": symbol.get("file_path"),
+            "docstring": symbol.get("docstring"),
+            "signature": _format_signature(symbol) if symbol.get("signature") else None,
+            "annotations": [a.get("name") for a in symbol.get("annotations", [])],
+            "modifiers": symbol.get("modifiers", []),
+            "parent_symbol_id": symbol.get("parent_symbol_id"),
+            "url": f"symbols/{safe_filename}",
+        }
+        symbols.append(entry)
+
+    sections = []
+    if analysis_data:
+        for section in analysis_data.get("content", []):
+            sections.append({
+                "key": section.get("key"),
+                "title": section.get("title"),
+                "body": section.get("body"),
+                "facts": section.get("facts", {}),
+            })
+
+    summaries = []
+    if analysis_data:
+        for summary in analysis_data.get("summaries", []):
+            summaries.append({
+                "node_id": summary.get("node_id"),
+                "name": summary.get("name"),
+                "tier": summary.get("tier"),
+                "summary": summary.get("summary"),
+            })
+
+    context = {
+        "repository_name": repository_index.get("repository_name", "Project"),
+        "repository_path": repository_index.get("repository_path"),
+        "languages": repository_index.get("languages", []),
+        "symbols": symbols,
+        "sections": sections,
+        "summaries": summaries,
+    }
+
+    context_path = WIKI_OUTPUT_DIR / "wiki_context.json"
+    with open(context_path, "w", encoding="utf-8") as f:
+        json.dump(context, f, ensure_ascii=False)
+    print("✅ Đã tạo AI Context (wiki_context.json)")

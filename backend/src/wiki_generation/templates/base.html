@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{% block title %}RepoAtlas Wiki{% endblock %}</title>
+    
+    <!-- Google Fonts Preconnect & Load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-low": "#f3f3f4",
+              "tertiary-fixed": "#c9e6ff",
+              "on-secondary": "#ffffff",
+              "surface-variant": "#e2e2e2",
+              "secondary-fixed-dim": "#b7c8e1",
+              "on-tertiary-fixed-variant": "#004c6e",
+              "surface-tint": "#0053db",
+              "primary-container": "#2563eb",
+              "on-tertiary": "#ffffff",
+              "on-surface-variant": "#434655",
+              "surface-subtle": "#f8fafc",
+              "surface-container-highest": "#e2e2e2",
+              "on-primary-container": "#eeefff",
+              "error-container": "#ffdad6",
+              "on-secondary-fixed": "#0b1c30",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed": "#dbe1ff",
+              "on-primary-fixed": "#00174b",
+              "on-secondary-container": "#54647a",
+              "tertiary-container": "#0074a6",
+              "surface-bright": "#f9f9f9",
+              "on-error-container": "#93000a",
+              "surface-container": "#eeeeee",
+              "secondary": "#505f76",
+              "on-primary": "#ffffff",
+              "primary-fixed-dim": "#b4c5ff",
+              "inverse-primary": "#b4c5ff",
+              "error": "#ba1a1a",
+              "tertiary": "#005a82",
+              "on-error": "#ffffff",
+              "surface": "#f9f9f9",
+              "on-secondary-fixed-variant": "#38485d",
+              "surface-container-high": "#e8e8e8",
+              "on-background": "#1a1c1c",
+              "secondary-fixed": "#d3e4fe",
+              "text-secondary": "#475569",
+              "text-primary": "#0f172a",
+              "on-surface": "#1a1c1c",
+              "on-tertiary-fixed": "#001e2f",
+              "on-tertiary-container": "#e4f2ff",
+              "surface-border": "#e2e8f0",
+              "inverse-surface": "#2f3131",
+              "secondary-container": "#d0e1fb",
+              "inverse-on-surface": "#f0f1f1",
+              "background": "#f9f9f9",
+              "outline-variant": "#c3c6d7",
+              "outline": "#737686",
+              "primary": "#004ac6",
+              "tertiary-fixed-dim": "#89ceff",
+              "on-primary-fixed-variant": "#003ea8",
+              "surface-dim": "#dadada"
+            },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "full": "9999px"
+            },
+            spacing: {
+              "base": "4px",
+              "xs": "4px",
+              "sm": "8px",
+              "lg": "24px",
+              "max-content-width": "1280px",
+              "xl": "32px",
+              "md": "16px",
+              "xxl": "48px",
+              "sidebar-width": "280px",
+              "container-max": "1200px"
+            },
+            fontFamily: {
+              "display-lg": ["Inter", "sans-serif"],
+              "body-md": ["Inter", "sans-serif"],
+              "body-sm": ["Inter", "sans-serif"],
+              "body-lg": ["Inter", "sans-serif"],
+              "label-md": ["Inter", "sans-serif"],
+              "headline-md": ["Inter", "sans-serif"],
+              "headline-sm": ["Inter", "sans-serif"],
+              "code-md": ["JetBrains Mono", "monospace"]
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+            margin: 0;
+            padding: 0;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined' !important;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+    <!-- SideNavBar -->
+    <aside class="hidden md:flex bg-surface-container-lowest text-on-surface w-[280px] h-screen fixed left-0 top-0 overflow-y-auto border-r border-outline-variant shadow-sm flex-col py-xl z-50">
+        <div class="px-lg mb-xl">
+            <h1 class="font-display-lg text-2xl font-bold text-primary mb-xs">
+                <a href="{{ rel_prefix or '' }}index.html">RepoAtlas</a>
+            </h1>
+            <p class="text-on-surface-variant text-sm">Documentation</p>
+        </div>
+        
+        <!-- Search Bar Container -->
+        <div class="px-lg mb-lg">
+            <div class="relative group">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary text-sm">search</span>
+                <input type="text" id="searchInput" class="w-full bg-surface-container-low text-on-surface rounded-full py-sm pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary border-none transition-all placeholder:text-outline-variant" placeholder="Search files, symbols...">
+                <div id="searchResults" class="hidden absolute top-11 left-0 right-0 bg-surface-container-lowest border border-outline-variant rounded-xl max-h-80 overflow-y-auto z-50 shadow-lg"></div>
+            </div>
+        </div>
+
+        <nav class="flex-1 flex flex-col gap-xs pr-md">
+            <a id="nav-overview" class="nav-item flex items-center gap-md text-on-surface-variant px-lg py-sm hover:bg-surface-container transition-colors rounded-r-full scale-98 active:scale-95 duration-150" href="{{ rel_prefix or '' }}index.html">
+                <span class="material-symbols-outlined text-primary">analytics</span>
+                Project Overview
+            </a>
+            <a id="nav-tech" class="nav-item flex items-center gap-md text-on-surface-variant px-lg py-sm hover:bg-surface-container transition-colors rounded-r-full scale-98 active:scale-95 duration-150" href="{{ rel_prefix or '' }}tech.html">
+                <span class="material-symbols-outlined text-primary">layers</span>
+                Tech Stack
+            </a>
+            <a id="nav-architecture" class="nav-item flex items-center gap-md text-on-surface-variant px-lg py-sm hover:bg-surface-container transition-colors rounded-r-full scale-98 active:scale-95 duration-150" href="{{ rel_prefix or '' }}architecture.html">
+                <span class="material-symbols-outlined text-primary">account_tree</span>
+                Architecture
+            </a>
+            <a id="nav-modules" class="nav-item flex items-center gap-md text-on-surface-variant px-lg py-sm hover:bg-surface-container transition-colors rounded-r-full scale-98 active:scale-95 duration-150" href="{{ rel_prefix or '' }}modules.html">
+                <span class="material-symbols-outlined text-primary">view_module</span>
+                Modules
+            </a>
+            <a id="nav-tests" class="nav-item flex items-center gap-md text-on-surface-variant px-lg py-sm hover:bg-surface-container transition-colors rounded-r-full scale-98 active:scale-95 duration-150" href="{{ rel_prefix or '' }}tests.html">
+                <span class="material-symbols-outlined text-primary">terminal</span>
+                Tests
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="ml-0 md:ml-[280px] flex-1 min-h-screen flex flex-col w-full">
+        <!-- TopNavBar -->
+        <header class="bg-surface-container-lowest text-on-surface font-label-md flex justify-between items-center px-lg h-16 w-full sticky top-0 z-40 border-b border-outline-variant bg-opacity-90 backdrop-blur-sm">
+            <div class="flex items-center gap-md">
+                <nav class="flex gap-sm items-center text-sm text-on-surface-variant">
+                    <a class="hover:text-primary transition-colors font-medium" href="{{ rel_prefix or '' }}index.html">Home</a>
+                    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                    <span class="text-primary font-semibold">{% block breadcrumb %}Page{% endblock %}</span>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Page Content Wrapper -->
+        <div class="flex-1 max-w-[1200px] mx-auto w-full p-md md:p-xl">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Floating Local AI Chat Widget -->
+    <div id="aiChatWidget" class="fixed bottom-6 right-6 z-50">
+        <!-- Toggle Button -->
+        <button id="aiChatToggle" class="bg-primary text-on-primary px-4 py-3 rounded-full shadow-xl flex items-center gap-2 hover:scale-105 transition-all duration-200 font-semibold cursor-pointer border border-primary-container">
+            <span class="material-symbols-outlined text-xl">smart_toy</span>
+            <span>Ask Local AI</span>
+        </button>
+
+        <!-- Chat Panel -->
+        <div id="aiChatPanel" class="hidden fixed bottom-20 right-6 w-[380px] sm:w-[420px] h-[520px] bg-surface-container-lowest border border-outline-variant shadow-2xl rounded-2xl flex flex-col overflow-hidden transition-all duration-200">
+            <!-- Header -->
+            <div class="bg-surface-container-low px-md py-sm border-b border-outline-variant flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-2xl">psychology</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-on-surface m-0 leading-tight">RepoAtlas AI</h3>
+                        <p class="text-[11px] text-outline m-0 flex items-center gap-1">
+                            <span id="aiStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                            <span id="aiStatusText">Local Ollama (qwen2.5-coder:3b)</span>
+                        </p>
+                    </div>
+                </div>
+                <button id="aiChatClose" class="text-outline hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition-colors">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+
+            <!-- Messages Container -->
+            <div id="aiChatMessages" class="flex-1 p-md overflow-y-auto space-y-md text-xs">
+                <div class="bg-surface-container-low p-md rounded-xl text-on-surface max-w-[85%] border border-outline-variant/40">
+                    <p class="m-0 font-medium">👋 Xin chào! Tôi là AI Assistant của dự án. Bạn có thể hỏi tôi bất kỳ câu hỏi nào về vị trí hàm, class hay kiến trúc codebase này!</p>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-sm bg-surface-container-lowest border-t border-outline-variant flex items-center gap-sm">
+                <input type="text" id="aiChatInput" class="flex-1 bg-surface-container-low text-on-surface rounded-xl px-md py-sm text-xs border border-outline-variant focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ví dụ: hàm main ở đâu?">
+                <button id="aiChatSend" class="bg-primary text-on-primary p-sm rounded-xl hover:bg-primary-container transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search, Navigation & Local AI Chat Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const isSymbolPage = window.location.pathname.includes('/symbols/');
+            const relPrefix = isSymbolPage ? '../' : '';
+            let searchIndex = [];
+            let aiContext = null;
+
+            // 1. Load Search Index
+            fetch(relPrefix + 'search_index.json')
+                .then(response => response.json())
+                .then(data => searchIndex = data)
+                .catch(err => console.error("Could not load search_index.json", err));
+
+            // 1b. Load AI Context (rich knowledge base for the chat widget)
+            fetch(relPrefix + 'wiki_context.json')
+                .then(response => response.json())
+                .then(data => aiContext = data)
+                .catch(err => console.error("Could not load wiki_context.json", err));
+
+            // 2. Live Search Logic
+            const searchInput = document.getElementById("searchInput");
+            const searchResults = document.getElementById("searchResults");
+
+            if (searchInput && searchResults) {
+                searchInput.addEventListener("input", function() {
+                    const query = this.value.toLowerCase().trim();
+                    searchResults.innerHTML = "";
+                    
+                    if (!query) {
+                        searchResults.classList.add("hidden");
+                        return;
+                    }
+
+                    const results = searchIndex.filter(item => item.name.toLowerCase().includes(query)).slice(0, 15);
+                    
+                    if (results.length > 0) {
+                        results.forEach(item => {
+                            const a = document.createElement("a");
+                            a.href = relPrefix + item.url;
+                            a.textContent = item.name;
+                            a.className = "block px-4 py-2 text-xs text-on-surface hover:bg-surface-container border-b border-surface-variant last:border-0 transition-colors";
+                            searchResults.appendChild(a);
+                        });
+                        searchResults.classList.remove("hidden");
+                    } else {
+                        const noResult = document.createElement("div");
+                        noResult.textContent = "No results found";
+                        noResult.className = "px-4 py-2 text-xs text-outline";
+                        searchResults.appendChild(noResult);
+                        searchResults.classList.remove("hidden");
+                    }
+                });
+
+                document.addEventListener("click", function(e) {
+                    if (e.target !== searchInput && !searchResults.contains(e.target)) {
+                        searchResults.classList.add("hidden");
+                    }
+                });
+            }
+
+            // 3. Highlight Active Sidebar Item
+            const path = window.location.pathname;
+            let activeId = "nav-overview";
+            if (path.includes("tech.html")) activeId = "nav-tech";
+            else if (path.includes("architecture.html")) activeId = "nav-architecture";
+            else if (path.includes("modules.html")) activeId = "nav-modules";
+            else if (path.includes("tests.html")) activeId = "nav-tests";
+            
+            const activeElem = document.getElementById(activeId);
+            if (activeElem) {
+                activeElem.className = "nav-item flex items-center gap-md bg-secondary-container text-primary border-l-4 border-primary px-lg py-sm rounded-r-full font-semibold scale-98 active:scale-95 duration-150";
+            }
+
+            // 4. Local AI Chat Logic
+            const aiToggle = document.getElementById("aiChatToggle");
+            const aiPanel = document.getElementById("aiChatPanel");
+            const aiClose = document.getElementById("aiChatClose");
+            const aiInput = document.getElementById("aiChatInput");
+            const aiSend = document.getElementById("aiChatSend");
+            const aiMessages = document.getElementById("aiChatMessages");
+            const aiStatusDot = document.getElementById("aiStatusDot");
+            const aiStatusText = document.getElementById("aiStatusText");
+
+            const OLLAMA_ENDPOINT = "http://localhost:11434";
+            const OLLAMA_MODEL = "qwen2.5-coder:3b";
+
+            const STOP_WORDS = new Set([
+                "bao", "nhiêu", "trong", "đâu", "nào", "class", "hàm", "dự", "án",
+                "có", "mấy", "là", "của", "cho", "với", "và", "tôi", "bạn", "giúp",
+                "the", "and", "where", "what", "how", "which", "this", "that",
+                "list", "show", "find", "tell", "mô", "tả", "thế", "nào", "sao",
+                "hãy", "xin", "hỏi", "muốn", "biết", "về", "để", "cần", "thì",
+                "these", "those", "code", "tên", "các", "hàm", "phương", "thức"
+            ]);
+
+            if (aiToggle && aiPanel && aiClose) {
+                aiToggle.addEventListener("click", () => aiPanel.classList.toggle("hidden"));
+                aiClose.addEventListener("click", () => aiPanel.classList.add("hidden"));
+            }
+
+            function checkOllamaStatus() {
+                fetch(OLLAMA_ENDPOINT + "/api/tags")
+                    .then(resp => {
+                        if (!resp.ok) throw new Error();
+                        return resp.json();
+                    })
+                    .then(data => {
+                        const models = (data.models || []).map(m => m.name);
+                        const hasModel = models.some(m => m.startsWith("qwen2.5-coder") || m.includes("qwen"));
+                        if (hasModel) {
+                            aiStatusDot.className = "w-2 h-2 rounded-full bg-emerald-500 inline-block";
+                            aiStatusText.textContent = "Ollama online · " + OLLAMA_MODEL;
+                        } else {
+                            aiStatusDot.className = "w-2 h-2 rounded-full bg-amber-500 inline-block";
+                            aiStatusText.textContent = "Ollama online (mô hình khác, cần qwen2.5-coder:3b)";
+                        }
+                    })
+                    .catch(() => {
+                        aiStatusDot.className = "w-2 h-2 rounded-full bg-error inline-block";
+                        aiStatusText.textContent = "Ollama offline · dùng tìm kiếm nội bộ";
+                    });
+            }
+            checkOllamaStatus();
+            setInterval(checkOllamaStatus, 30000);
+
+            function extractKeywords(text) {
+                const lower = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const tokens = lower.match(/[a-z0-9_]+/g) || [];
+                return tokens.filter(w => w.length > 2 && !STOP_WORDS.has(w));
+            }
+
+            function scoreSymbol(sym, words) {
+                let score = 0;
+                const name = (sym.name || "").toLowerCase();
+                const fqn = (sym.fully_qualified_name || "").toLowerCase();
+                const file = (sym.file_path || "").toLowerCase();
+                const doc = (sym.docstring || "").toLowerCase();
+                const sig = (sym.signature || "").toLowerCase();
+                for (const w of words) {
+                    if (name === w || fqn === w || fqn.endsWith("." + w)) score += 120;
+                    else if (name.includes(w)) score += 50;
+                    else if (fqn.includes(w)) score += 30;
+                    else if (file.includes(w)) score += 20;
+                    else if (doc.includes(w)) score += 10;
+                    else if (sig.includes(w)) score += 8;
+                }
+                return score;
+            }
+
+            function scoreSection(sec, words) {
+                let score = 0;
+                const title = (sec.title || "").toLowerCase();
+                const body = (sec.body || "").toLowerCase();
+                for (const w of words) {
+                    if (title.includes(w)) score += 40;
+                    if (body.includes(w)) score += 10;
+                }
+                return score;
+            }
+
+            function detectIntent(text) {
+                const lower = text.toLowerCase();
+                const intent = { type: "general", count: false };
+                if (/(bao nhiêu|mấy class|đếm|how many|thống kê|tổng số|số lượng)/.test(lower)) intent.count = true;
+                if (/(ở đâu|tìm|định vị|vị trí|where is|find|located)/.test(lower)) intent.type = "locate";
+                else if (/(test|kiểm thử|chạy test|junit|xunit)/.test(lower)) intent.type = "tests";
+                else if (/(kiến trúc|architecture|tầng|layer|được tổ chức)/.test(lower)) intent.type = "architecture";
+                else if (/(công nghệ|tech|framework|ngôn ngữ|thư viện)/.test(lower)) intent.type = "tech";
+                else if (/(danh sách|liệt kê|list|liệt kê các)/.test(lower)) intent.type = "list";
+                return intent;
+            }
+
+            function buildSymbolContext(matched, limit) {
+                return matched.slice(0, limit).map(s =>
+                    `- [${s.kind}] ${s.fully_qualified_name}\n  File: ${s.file_path}\n  Doc: ${s.docstring || "(no docstring)"}${s.signature ? "\n  Sig: " + s.signature : ""}`
+                ).join("\n");
+            }
+
+            function addLoadingBubble() {
+                const aiMsg = document.createElement("div");
+                aiMsg.className = "bg-surface-container-low p-md rounded-xl text-on-surface max-w-[85%] border border-outline-variant/40 leading-relaxed space-y-2";
+                aiMsg.innerHTML = `<span class="animate-pulse text-outline">Đang suy nghĩ...</span>`;
+                aiMessages.appendChild(aiMsg);
+                aiMessages.scrollTop = aiMessages.scrollHeight;
+                return aiMsg;
+            }
+
+            function appendStreamLine(aiMsg, text) {
+                aiMsg.textContent += text;
+                aiMessages.scrollTop = aiMessages.scrollHeight;
+            }
+
+            async function sendMessage() {
+                const text = aiInput.value.trim();
+                if (!text) return;
+
+                // Add User Message
+                const userMsg = document.createElement("div");
+                userMsg.className = "bg-primary text-on-primary p-md rounded-xl max-w-[85%] ml-auto shadow-xs font-medium";
+                userMsg.textContent = text;
+                aiMessages.appendChild(userMsg);
+                aiInput.value = "";
+                aiMessages.scrollTop = aiMessages.scrollHeight;
+
+                // Parse symbols & sections from rich context (fallback to search_index if missing)
+                let symbolPool = (aiContext && aiContext.symbols) || [];
+                if (symbolPool.length === 0) {
+                    symbolPool = searchIndex.filter(item => item.url.startsWith('symbols/')).map(item => ({
+                        name: item.name.split(".").pop(),
+                        fully_qualified_name: item.name,
+                        url: item.url,
+                        file_path: "",
+                        docstring: ""
+                    }));
+                }
+                const sectionPool = (aiContext && aiContext.sections) || [];
+                const summariesPool = (aiContext && aiContext.summaries) || [];
+
+                const intent = detectIntent(text);
+                const words = extractKeywords(text);
+
+                // Rank symbols & sections by keyword score
+                const matchedSymbols = symbolPool
+                    .map(s => ({ s, score: scoreSymbol(s, words) }))
+                    .filter(x => x.score > 0)
+                    .sort((a, b) => b.score - a.score)
+                    .map(x => x.s)
+                    .slice(0, 12);
+                const matchedSections = sectionPool
+                    .map(sec => ({ sec, score: scoreSection(sec, words) }))
+                    .filter(x => x.score > 0)
+                    .sort((a, b) => b.score - a.score)
+                    .map(x => x.sec)
+                    .slice(0, 3);
+
+                const aiMsg = addLoadingBubble();
+
+                // Build context for Ollama
+                let contextStr = "";
+                if (aiContext) {
+                    contextStr += `\nRepository: ${aiContext.repository_name}`;
+                    contextStr += `\nLanguages: ${(aiContext.languages || []).join(", ") || "N/A"}`;
+                }
+                if (matchedSymbols.length > 0) {
+                    contextStr += "\n\n### Symbols liên quan:\n" + buildSymbolContext(matchedSymbols, 8);
+                }
+                if (matchedSections.length > 0) {
+                    contextStr += "\n\n### Section wiki liên quan:\n" + matchedSections.map(sec =>
+                        `- [${sec.key}] ${sec.title}: ${(sec.body || "").substring(0, 600)}`
+                    ).join("\n");
+                }
+                if (matchedSymbols.length === 0 && matchedSections.length === 0) {
+                    contextStr += `\n\n### Tổng quan codebase:\n${summariesPool.filter(s => s.tier === 1 || s.tier === 2).map(s => `- ${s.name}: ${(s.summary || "").substring(0, 300)}`).join("\n")}`;
+                }
+
+                let ollamaSuccess = false;
+                try {
+                    const promptText = `Bạn là RepoAtlas AI Assistant cho codebase "${aiContext ? aiContext.repository_name : "này"}". Hãy trả lời câu hỏi của người dùng DỰA TRÊN THÔNG TIN INDEX DƯỚI ĐÂY (không bịa đặt). Nếu không tìm thấy trong index, hãy nói rõ là không có trong dữ liệu phân tích.${contextStr}\n\nCâu hỏi người dùng: ${text}\n\nTrả lời ngắn gọn, chính xác bằng tiếng Việt. Nêu rõ tên class/hàm, loại symbol, file path và đường dẫn wiki nếu có.`;
+
+                    const response = await fetch(OLLAMA_ENDPOINT + "/api/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            model: OLLAMA_MODEL,
+                            prompt: promptText,
+                            stream: true,
+                            options: { temperature: 0.2 }
+                        })
+                    });
+
+                    if (response.ok) {
+                        ollamaSuccess = true;
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+                        aiMsg.textContent = "";
+                        let buffer = "";
+
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            buffer += decoder.decode(value, { stream: true });
+                            const lines = buffer.split("\n");
+                            buffer = lines.pop();
+                            for (const line of lines) {
+                                try {
+                                    const parsed = JSON.parse(line);
+                                    if (parsed.response) appendStreamLine(aiMsg, parsed.response);
+                                } catch (e) {}
+                            }
+                        }
+                    }
+                } catch (err) {
+                    // Ollama fetch failed (CORS or server not bound)
+                }
+
+                // If Ollama didn't reply, provide intelligent fallback from local context
+                if (!ollamaSuccess) {
+                    let htmlResult = "";
+
+                    if (intent.count) {
+                        const classes = symbolPool.filter(s => s.kind === "CLASS");
+                        const methods = symbolPool.filter(s => s.kind === "METHOD" || s.kind === "CONSTRUCTOR");
+                        htmlResult += `<p class="font-semibold text-primary m-0">📊 Thống kê codebase từ index phân tích:</p>`;
+                        htmlResult += `<p class="m-0 mt-1">Tổng cộng <strong>${symbolPool.length}</strong> symbols, trong đó có <strong>${classes.length}</strong> class/type, <strong>${methods.length}</strong> hàm/constructor.</p>`;
+                        if (aiContext && aiContext.languages && aiContext.languages.length) {
+                            htmlResult += `<p class="m-0 mt-1">Ngôn ngữ: ${aiContext.languages.join(", ")}.</p>`;
+                        }
+                        if (symbolPool.length > 0) {
+                            htmlResult += `<div class="mt-2 max-h-48 overflow-y-auto"><ul class="list-disc pl-4 space-y-1 mt-1">`;
+                            symbolPool.slice(0, 30).forEach(s => {
+                                const url = s.url || (s.fully_qualified_name ? "symbols/" + s.fully_qualified_name.replace(/[<>]/g, "_") + ".html" : "");
+                                htmlResult += `<li><a href="${relPrefix}${url}" class="text-primary hover:underline font-mono">${s.fully_qualified_name || s.name}</a></li>`;
+                            });
+                            if (symbolPool.length > 30) htmlResult += `<li class="text-outline">... và ${symbolPool.length - 30} symbols khác</li>`;
+                            htmlResult += `</ul></div>`;
+                        }
+                    } else if (matchedSymbols.length > 0) {
+                        htmlResult += `<p class="font-semibold text-primary m-0">🔍 Kết quả tìm từ index phân tích (${matchedSymbols.length} symbol phù hợp):</p>`;
+                        htmlResult += `<div class="space-y-2 mt-2">`;
+                        matchedSymbols.forEach(s => {
+                            const url = s.url || "symbols/" + s.fully_qualified_name.replace(/[<>]/g, "_") + ".html";
+                            htmlResult += `<div class="bg-surface-container-low/70 border border-outline-variant/30 rounded-lg p-2">
+                                <a href="${relPrefix}${url}" class="text-primary hover:underline font-mono text-xs font-semibold">${s.fully_qualified_name || s.name}</a>
+                                ${s.kind ? `<span class="ml-1 text-[10px] uppercase tracking-wide bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">${s.kind}</span>` : ""}
+                                ${s.signature ? `<div class="font-mono text-[10px] text-on-surface-variant mt-1">${s.signature}</div>` : ""}
+                                ${s.file_path ? `<div class="font-mono text-[10px] text-outline mt-0.5">${s.file_path}</div>` : ""}
+                                ${s.docstring ? `<div class="text-[11px] text-on-surface-variant mt-1">${s.docstring}</div>` : ""}
+                            </div>`;
+                        });
+                        htmlResult += `</div>`;
+                    } else if (matchedSections.length > 0) {
+                        htmlResult += `<p class="font-semibold text-primary m-0">📄 Nội dung từ wiki liên quan:</p>`;
+                        htmlResult += `<div class="space-y-2 mt-2">`;
+                        matchedSections.forEach(sec => {
+                            htmlResult += `<div class="bg-surface-container-low/70 border border-outline-variant/30 rounded-lg p-2">
+                                <div class="font-semibold text-xs text-on-surface">${sec.title}</div>
+                                <div class="text-[11px] text-on-surface-variant mt-1 leading-relaxed">${(sec.body || "Chưa có nội dung.").substring(0, 500)}</div>
+                            </div>`;
+                        });
+                        htmlResult += `</div>`;
+                    } else {
+                        htmlResult += `<p class="m-0">Tóm tắt codebase: Tổng cộng <strong>${symbolPool.length}</strong> symbols được ghi nhận.</p>`;
+                        if (summariesPool.length > 0) {
+                            const top = summariesPool.filter(s => s.tier === 1 || s.tier === 2).slice(0, 3);
+                            if (top.length > 0) {
+                                htmlResult += `<div class="mt-2 space-y-1">`;
+                                top.forEach(s => {
+                                    htmlResult += `<p class="m-0 text-[11px] text-on-surface-variant"><strong class="text-primary">${s.name}:</strong> ${(s.summary || "").substring(0, 200)}</p>`;
+                                });
+                                htmlResult += `</div>`;
+                            }
+                        }
+                        htmlResult += `<p class="m-0 mt-2 text-[11px] text-outline">Gợi ý: hãy gõ tên class/hàm cụ thể (ví dụ <em>PaymentProcessor</em>, <em>render</em>) hoặc hỏi về kiến trúc, test, tech stack.</p>`;
+                    }
+
+                    htmlResult += `<div class="mt-3 pt-2 border-t border-outline-variant/30 text-[11px] text-outline">
+                        <span class="font-medium text-on-surface-variant">💡 Để bật AI trả lời đầy đủ, hãy kết nối Ollama:</span><br/>
+                        Mở PowerShell gõ: <code class="bg-surface-container px-1 py-0.5 rounded text-primary">$env:OLLAMA_ORIGINS="*" ; ollama serve</code><br/>
+                        <span class="text-on-surface-variant">và đảm bảo đã tải model:</span> <code class="bg-surface-container px-1 py-0.5 rounded text-primary">ollama pull qwen2.5-coder:3b</code>
+                    </div>`;
+
+                    aiMsg.innerHTML = htmlResult;
+                    aiMessages.scrollTop = aiMessages.scrollHeight;
+                }
+            }
+
+            if (aiSend && aiInput) {
+                aiSend.addEventListener("click", sendMessage);
+                aiInput.addEventListener("keypress", (e) => {
+                    if (e.key === "Enter") sendMessage();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
